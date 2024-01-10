@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #history {
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Guess the Number Game</h1>
+    <p>Guess a number between 1 and 20:</p>
+
+    <input type="number" id="userGuess" min="1" max="20">
+    <button onclick="checkGuess()">Submit Guess</button>
+
+    <div id="result"></div>
+    <div id="history"></div>
+
+    <script>
+        const targetNumber = Math.floor(Math.random() * 20) + 1;
+        let attempts = 0;
+        const guessHistory = [];
+
+        function checkGuess() {
+            const userGuess = parseInt(document.getElementById('userGuess').value);
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 20) {
+                alert('Please enter a valid number between 1 and 20.');
+                return;
+            }
+
+            attempts++;
+            guessHistory.push(userGuess);
+
+            if (userGuess === targetNumber) {
+                document.getElementById('result').innerHTML = `Congratulations! You guessed the correct number ${targetNumber} in ${attempts} attempts.`;
+                document.getElementById('result').style.color = 'green';
+                document.getElementById('userGuess').disabled = true;
+            } else {
+                const hint = userGuess < targetNumber ? 'higher' : 'lower';
+                document.getElementById('result').innerHTML = `Try again! Guess ${hint}.`;
+                document.getElementById('result').style.color = 'red';
+            }
+
+            displayGuessHistory();
+        }
+
+        function displayGuessHistory() {
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = `<p>Guess History: ${guessHistory.join(', ')}</p>`;
+        }
+    </script>
+
+</body>
+</html>
