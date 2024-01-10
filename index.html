@@ -3,12 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guess the Number Game</title>
+    <title>Advanced Guess the Number Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 50px;
+            background-color: #f2f2f2;
+        }
+        #game-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
         }
         #result {
             font-size: 1.5em;
@@ -18,23 +27,109 @@
             margin-top: 20px;
             font-style: italic;
         }
+        #leaderboard {
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Guess the Number Game</h1>
-    <p>Guess a number between 1 and 20:</p>
+    <div id="game-container">
+        <h1>Advanced Guess the Number Game</h1>
+        <label for="userGuess">Enter your guess (1-20):</label>
+        <input type="number" id="userGuess" min="1" max="20">
+        <button onclick="checkGuess()">Submit Guess</button>
+        <button onclick="resetGame()">Reset Game</button>
+        <button onclick="viewStats()">View Stats</button>
+        <p>Difficulty Level: 
+            <select id="difficulty" onchange="changeDifficulty()">
+                <option value="easy">Easy (1-10)</option>
+                <option value="medium" selected>Medium (1-20)</option>
+                <option value="hard">Hard (1-30)</option>
+            </select>
+        </p>
 
-    <input type="number" id="userGuess" min="1" max="20">
-    <button onclick="checkGuess()">Submit Guess</button>
-
-    <div id="result"></div>
-    <div id="history"></div>
+        <div id="result"></div>
+        <div id="history"></div>
+        <p id="timer">Time: <span id="time">0</span> seconds</p>
+        
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Attempts</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Leaderboard data will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
-        const targetNumber = Math.floor(Math.random() * 20) + 1;
-        let attempts = 0;
-        const guessHistory = [];
+        let targetNumber, attempts, guessHistory, timer, username;
+        let leaderboardData = [];
+
+        function initializeGame() {
+            targetNumber = generateRandomNumber(20); // Default difficulty is medium
+            attempts = 0;
+            guessHistory = [];
+            startTimer();
+            document.getElementById('userGuess').disabled = false;
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('history').innerHTML = '';
+            document.getElementById('difficulty').disabled = false;
+            displayTimer();
+            fetchLeaderboard();
+            getUsername();
+        }
+
+        function getUsername() {
+            // Check if the user has previously entered a username
+            username = localStorage.getItem('username');
+
+            if (!username) {
+                username = prompt('Enter your username for the leaderboard:');
+                localStorage.setItem('username', username);
+            }
+        }
+
+        function generateRandomNumber(max) {
+            return Math.floor(Math.random() * max) + 1;
+        }
+
+        function startTimer() {
+            timer = setInterval(function () {
+                displayTimer();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+        }
+
+        function displayTimer() {
+            const timeElement = document.getElementById('time');
+            const currentTime = parseInt(timeElement.innerText, 10) + 1;
+            timeElement.innerText = currentTime;
+        }
 
         function checkGuess() {
             const userGuess = parseInt(document.getElementById('userGuess').value);
@@ -48,9 +143,14 @@
             guessHistory.push(userGuess);
 
             if (userGuess === targetNumber) {
+                stopTimer();
                 document.getElementById('result').innerHTML = `Congratulations! You guessed the correct number ${targetNumber} in ${attempts} attempts.`;
                 document.getElementById('result').style.color = 'green';
                 document.getElementById('userGuess').disabled = true;
+                document.getElementById('difficulty').disabled = true;
+                
+                updateLeaderboard(username, attempts, parseInt(document.getElementById('time').innerText, 10));
+                updateStats(username, attempts, parseInt(document.getElementById('time').innerText, 10));
             } else {
                 const hint = userGuess < targetNumber ? 'higher' : 'lower';
                 document.getElementById('result').innerHTML = `Try again! Guess ${hint}.`;
@@ -64,7 +164,49 @@
             const historyElement = document.getElementById('history');
             historyElement.innerHTML = `<p>Guess History: ${guessHistory.join(', ')}</p>`;
         }
-    </script>
 
-</body>
-</html>
+        function resetGame() {
+            stopTimer();
+            initializeGame();
+        }
+
+        function changeDifficulty() {
+            const difficultySelect = document.getElementById('difficulty');
+            const selectedDifficulty = difficultySelect.value;
+
+            switch (selectedDifficulty) {
+                case 'easy':
+                    targetNumber = generateRandomNumber(10);
+                    break;
+                case 'medium':
+                    targetNumber = generateRandomNumber(20);
+                    break;
+                case 'hard':
+                    targetNumber = generateRandomNumber(30);
+                    break;
+                default:
+                    targetNumber = generateRandomNumber(20);
+                    break;
+            }
+
+            resetGame();
+        }
+
+        function fetchLeaderboard() {
+            // Simulate fetching leaderboard data from the server
+            // In a real application, you would make an API request to the server
+            leaderboardData = [
+                { username: 'Player1', attempts: 5, time: 10 },
+                { username: 'Player2', attempts: 8, time: 15 },
+                { username: 'Player3', attempts: 6, time: 12 },
+                // Add more data as needed
+            ];
+
+            updateLeaderboardTable();
+        }
+
+        function updateLeaderboard(username, attempts, time) {
+            // Simulate updating leaderboard data on the server
+            // In a real application, you would make an API request to update the leaderboard
+            leaderboardData.push({ username, attempts, time });
+
