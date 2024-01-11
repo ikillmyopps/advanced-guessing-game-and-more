@@ -67,3 +67,56 @@ app.post('/api/rps', (req, res) => {
 
 // ... Existing server code
 
+const express = require('express');
+const bodyParser = require('body-parser');
+const device = require('express-device');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(device.capture());
+
+// In-memory Hangman game data
+let hangmanWord = 'hangman';
+let hangmanWordState = Array(hangmanWord.length).fill('_');
+let hangmanAttempts = 0;
+const maxHangmanAttempts = 6;
+
+// Your existing Rock, Paper, Scissors game logic
+// ...
+
+// New endpoint to get Hangman game state
+app.get('/api/hangman', (req, res) => {
+    res.json({ hangmanWordState, hangmanAttempts });
+});
+
+// New endpoint to make a guess in the Hangman game
+app.post('/api/hangman/guess', (req, res) => {
+    const { guess } = req.body;
+
+    if (!guess || !guess.match(/[a-z]/i)) {
+        return res.status(400).json({ error: 'Invalid guess. Please provide a letter.' });
+    }
+
+    const guessedLetter = guess.toLowerCase();
+
+    if (hangmanWord.includes(guessedLetter)) {
+        // Update the Hangman word state with the correctly guessed letter
+        hangmanWordState = hangmanWordState.map((letter, index) =>
+            hangmanWord[index] === guessedLetter ? guessedLetter : letter
+        );
+    } else {
+        hangmanAttempts++;
+    }
+
+    res.json({ hangmanWordState, hangmanAttempts });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
