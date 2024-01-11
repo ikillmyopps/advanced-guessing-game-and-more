@@ -40,3 +40,30 @@ app.post('/api/leaderboard', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// ... Existing server code
+
+// Rock, Paper, Scissors game logic
+app.post('/api/rps', (req, res) => {
+    const { username, choice } = req.body;
+    const choices = ['rock', 'paper', 'scissors'];
+    const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+
+    let result;
+    if (choice === computerChoice) {
+        result = 'It\'s a tie!';
+    } else if (
+        (choice === 'rock' && computerChoice === 'scissors') ||
+        (choice === 'paper' && computerChoice === 'rock') ||
+        (choice === 'scissors' && computerChoice === 'paper')
+    ) {
+        result = 'You win!';
+    } else {
+        result = 'You lose!';
+    }
+
+    res.json({ result, computerChoice });
+});
+
+// ... Existing server code
+
