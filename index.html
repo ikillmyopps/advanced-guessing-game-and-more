@@ -209,4 +209,74 @@
             // Simulate updating leaderboard data on the server
             // In a real application, you would make an API request to update the leaderboard
             leaderboardData.push({ username, attempts, time });
+            leaderboardData.sort((a, b) => {
+                // Sort leaderboard entries by attempts and then by time
+                if (a.attempts === b.attempts) {
+                    return a.time - b.time;
+                }
+                return a.attempts - b.attempts;
+            });
 
+            updateLeaderboardTable();
+        }
+
+        function updateLeaderboardTable() {
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            leaderboardBody.innerHTML = '';
+
+            leaderboardData.forEach((entry, index) => {
+                const row = `<tr>
+                                <td>${index + 1}</td>
+                                <td>${entry.username}</td>
+                                <td>${entry.attempts}</td>
+                                <td>${entry.time} seconds</td>
+                            </tr>`;
+                leaderboardBody.innerHTML += row;
+            });
+        }
+
+        function updateStats(username, attempts, time) {
+            // Update user statistics in local storage
+            const userStats = JSON.parse(localStorage.getItem(username)) || { games: [] };
+            userStats.games.push({ attempts, time, date: new Date().toLocaleDateString() });
+            localStorage.setItem(username, JSON.stringify(userStats));
+        }
+
+        function viewStats() {
+            // Display user statistics
+            const userStats = JSON.parse(localStorage.getItem(username)) || { games: [] };
+
+            let statsMessage = `<h2>${username}'s Statistics</h2>`;
+            if (userStats.games.length === 0) {
+                statsMessage += '<p>No games played yet.</p>';
+            } else {
+                statsMessage += `<table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Attempts</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                userStats.games.forEach(game => {
+                    statsMessage += `<tr>
+                                        <td>${game.date}</td>
+                                        <td>${game.attempts}</td>
+                                        <td>${game.time} seconds</td>
+                                    </tr>`;
+                });
+
+                statsMessage += `</tbody></table>`;
+            }
+
+            document.getElementById('result').innerHTML = statsMessage;
+        }
+
+        // Initialize the game on page load
+        window.onload = initializeGame;
+    </script>
+
+</body>
+</html>
