@@ -321,3 +321,67 @@
 </script>
 
 <!-- Your existing HTML content -->
+
+<!-- Your existing HTML content -->
+
+<div id="hangman-container">
+    <h2>Hangman Game</h2>
+    <p id="hangman-word-state"></p>
+    <p>Attempts left: <span id="hangman-attempts"></span></p>
+    <label for="hangman-guess">Guess a letter: </label>
+    <input type="text" id="hangman-guess" maxlength="1" style="text-transform: lowercase;">
+    <button onclick="guessHangman()">Guess</button>
+</div>
+
+<script>
+    // ... Existing JavaScript code
+
+    function guessHangman() {
+        const guess = document.getElementById('hangman-guess').value;
+
+        // Fetch Hangman game state from the server
+        fetch('/api/hangman/guess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ guess }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Update Hangman game UI with the new state
+                document.getElementById('hangman-word-state').innerText = `Word: ${data.hangmanWordState.join(' ')}`;
+                document.getElementById('hangman-attempts').innerText = maxHangmanAttempts - data.hangmanAttempts;
+
+                // Check for win or loss conditions
+                if (!data.hangmanWordState.includes('_')) {
+                    alert('Congratulations! You guessed the word!');
+                    resetHangman();
+                } else if (data.hangmanAttempts === maxHangmanAttempts) {
+                    alert(`Sorry, you've run out of attempts. The correct word was '${hangmanWord}'.`);
+                    resetHangman();
+                }
+            })
+            .catch(error => console.error('Error guessing Hangman:', error));
+    }
+
+    function resetHangman() {
+        // Reset Hangman game state on the server
+        fetch('/api/hangman/reset')
+            .then(response => response.json())
+            .then(() => {
+                // Clear UI and initiate a new game
+                document.getElementById('hangman-word-state').innerText = '';
+                document.getElementById('hangman-attempts').innerText = maxHangmanAttempts;
+                document.getElementById('hangman-guess').value = '';
+                guessHangman(); // Initial fetch to start the game
+            })
+            .catch(error => console.error('Error resetting Hangman:', error));
+    }
+
+    // ... More existing JavaScript code
+
+</script>
+
+<!-- Your existing HTML content -->
+
