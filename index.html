@@ -280,3 +280,44 @@
 
 </body>
 </html>
+<!-- Your existing HTML content -->
+
+<div id="rps-container">
+    <h2>Rock, Paper, Scissors Game</h2>
+    <label for="rpsChoice">Choose: </label>
+    <select id="rpsChoice">
+        <option value="rock">Rock</option>
+        <option value="paper">Paper</option>
+        <option value="scissors">Scissors</option>
+    </select>
+    <button onclick="playRPS()">Play</button>
+    <div id="rpsResult"></div>
+</div>
+
+<script>
+    // ... Existing JavaScript code
+
+    function playRPS() {
+        const choice = document.getElementById('rpsChoice').value;
+
+        // Fetch Rock, Paper, Scissors game result from the server
+        fetch('/api/rps', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, choice }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('rpsResult').innerHTML = `<p>Result: ${data.result}</p>`;
+                document.getElementById('rpsResult').innerHTML += `<p>Computer's Choice: ${data.computerChoice}</p>`;
+            })
+            .catch(error => console.error('Error playing Rock, Paper, Scissors:', error));
+    }
+
+    // ... More existing JavaScript code
+
+</script>
+
+<!-- Your existing HTML content -->
